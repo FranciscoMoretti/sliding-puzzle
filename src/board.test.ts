@@ -21,6 +21,18 @@ const TC1_neibourghs = [
   ]
 ];
 
+const TC1_twin1 = [
+  [0, 1, 2],
+  [3, 4, 5],
+  [6, 8, 7]
+];
+
+const TC1_twin2 = [
+  [0, 1, 2],
+  [3, 7, 5],
+  [6, 4, 8]
+];
+
 const TC2_tiles = [
   [3, 1, 2],
   [4, 0, 5],
@@ -78,6 +90,13 @@ const TC3_neibourghs = [
   ]
 ];
 
+const TC3_twin = [
+  [4, 1, 2, 3],
+  [8, 5, 6, 7],
+  [9, 10, 14, 0],
+  [11, 13, 14, 15]
+];
+
 test("goal 3x3 board", () => {
   let board = new Board(3, TC1_tiles);
   expect(board.isGoal()).toEqual(true);
@@ -86,6 +105,24 @@ test("goal 3x3 board", () => {
 test("non-goal 3x3 board", () => {
   let board = new Board(3, TC2_tiles);
   expect(board.isGoal()).toEqual(false);
+});
+
+test("solvable board", () => {
+  let board1 = new Board(3, TC1_tiles);
+  let board2 = new Board(3, TC2_tiles);
+  let board3 = new Board(4, TC3_tiles);
+  let board4 = new Board(4, TC3_neibourghs[0])
+  let board5 =new Board(3, TC1_twin1);
+  let board6 =new Board(3, TC1_twin2);
+  let board7 = new Board(4, TC3_twin)
+
+  expect(board1.isSolvable()).toEqual(true);
+  expect(board2.isSolvable()).toEqual(true);
+  expect(board3.isSolvable()).toEqual(true);
+  expect(board4.isSolvable()).toEqual(true);
+  expect(board5.isSolvable()).toEqual(false);
+  expect(board6.isSolvable()).toEqual(false);
+  expect(board7.isSolvable()).toEqual(false);
 });
 
 test("from other constructor", () => {

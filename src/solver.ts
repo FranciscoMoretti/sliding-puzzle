@@ -33,11 +33,6 @@ export default class Solver {
         this.solution_path = this.a_star(this.board)
     }
     
-    // is the initial board solvable? (see below)
-    public isSolvable():boolean{
-        return false
-    }
-
     // min number of moves to solve initial board
     public moves():number{
         return this.solution_path.length
