@@ -2,18 +2,32 @@ export default class Board {
     tiles: number[][];
     n: number;
     blank: number[];
+    hamming_d: number;
+    manhattan_d: number;
 
     constructor(_n: number, _tiles: number[][]) {
         this.n = _n
         this.tiles = new Array<Array<number>>()
         this.blank = [-1, -1]
+        this.hamming_d = 0
+        this.manhattan_d = 0
+        let index: number = 0
         for (let i: number = 0; i < _n; i++) {
             this.tiles[i] = []
             for (let j: number = 0; j < _n; j++) {
-                this.tiles[i][j] = _tiles[i][j]
-                if (_tiles[i][j] === 0) {
+                let tile : number = _tiles[i][j] 
+                this.tiles[i][j] =tile
+                if (tile === 0) {
                     this.blank = [i, j]
+                }else{
+                    if (tile !== index) {
+                        this.hamming_d++
+                    };
+                    let x_diff = Math.abs(tile % this.n - j)
+                    let y_diff = Math.abs(Math.floor(tile / this.n) - i)
+                    this.manhattan_d += x_diff + y_diff
                 }
+                index++
             }
         }
     }
@@ -44,33 +58,13 @@ export default class Board {
 
     // number of tiles out of place
     public hamming(): number {
-        let hamming: number = 0
-        let index: number = 0
-        for (let i: number = 0; i < this.n; i++) {
-            for (let j: number = 0; j < this.n; j++) {
-                if (this.tiles[i][j] !== index++ && this.tiles[i][j] !== 0) {
-                    hamming++
-                };
+        return this.hamming_d
             }
-        }
-        return hamming
-    }
 
     // sum of Manhattan distances between tiles and goal
     public manhattan(): number {
-        let manhattan: number = 0
-        for (let i: number = 0; i < this.n; i++) {
-            for (let j: number = 0; j < this.n; j++) {
-                if( this.tiles[i][j] === 0){
-                    continue
+        return this.manhattan_d
                 }
-                let x_diff = Math.abs(this.tiles[i][j] % this.n - j)
-                let y_diff = Math.abs(Math.floor(this.tiles[i][j] / this.n) - i)
-                manhattan += x_diff + y_diff
-            }
-        }
-        return manhattan
-    }
 
     // is this board the goal board?
     public isGoal(): boolean {
