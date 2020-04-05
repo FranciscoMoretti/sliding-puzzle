@@ -2,7 +2,7 @@ import Board from "./board";
 import Solver from "./solver";
 import * as tc from './test_constants'
 
-test("neighbors TC2", () => {
+test("solve TC2", () => {
   let solver = new Solver(new Board(3, tc.TC2_tiles));
   expect(solver.moves()).toEqual(2);  
   expect(solver.solution().map<number[][]>(
@@ -10,19 +10,27 @@ test("neighbors TC2", () => {
 });
 
 test("solvable board", () => {
-  let board1 = new Solver(new Board(3, tc.TC1_tiles))
-  let board2 = new Solver(new Board(3, tc.TC2_tiles))
-  let board3 = new Solver(new Board(4, tc.TC3_tiles))
-  let board4 = new Solver(new Board(4, tc.TC3_neibourghs[0]))
-  let board5 = new Solver(new Board(3, tc.TC1_twin1))
-  let board6 = new Solver(new Board(3, tc.TC1_twin2))
-  let board7 = new Solver(new Board(4, tc.TC3_twin))
+  expect(Board.isSolvable(new Board(3, tc.TC1_tiles))).toEqual(true);
+  expect(Board.isSolvable(new Board(3, tc.TC2_tiles))).toEqual(true);
+  expect(Board.isSolvable(new Board(4, tc.TC3_tiles))).toEqual(true);
+  expect(Board.isSolvable(new Board(4, tc.TC3_neibourghs[0]))).toEqual(true);
+  expect(Board.isSolvable(new Board(3, tc.TC1_twin1))).toEqual(false);
+  expect(Board.isSolvable(new Board(3, tc.TC1_twin2))).toEqual(false);
+  expect(Board.isSolvable(new Board(4, tc.TC3_twin))).toEqual(false);
+});
 
-  expect(board1.isSolvable()).toEqual(true);
-  expect(board2.isSolvable()).toEqual(true);
-  expect(board3.isSolvable()).toEqual(true);
-  expect(board4.isSolvable()).toEqual(true);
-  expect(board5.isSolvable()).toEqual(false);
-  expect(board6.isSolvable()).toEqual(false);
-  expect(board7.isSolvable()).toEqual(false);
+fit("solve TC4", () => {
+  let board1 = new Board(4, tc.TC3_tiles)
+  expect(Board.isSolvable(board1)).toEqual(true);
+  // let solver1 = new Solver();
+
+  let board2 = new Board(3, tc.TC5_tiles)
+  expect(Board.isSolvable(board2)).toEqual(true);  
+  let solver2 = new Solver(board2);
+  expect(solver2.moves()).toEqual(24);
+
+  let board3 = new Board(4, tc.TC4_tiles)
+  expect(Board.isSolvable(board3)).toEqual(true);  
+  // let solver3 = new Solver(new Board(4, tc.TC4_tiles));
+  // expect(solver3.moves()).toEqual(24);
 });

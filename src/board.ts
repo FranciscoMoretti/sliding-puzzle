@@ -59,12 +59,12 @@ export default class Board {
     // number of tiles out of place
     public hamming(): number {
         return this.hamming_d
-            }
+    }
 
     // sum of Manhattan distances between tiles and goal
     public manhattan(): number {
         return this.manhattan_d
-                }
+    }
 
     // is this board the goal board?
     public isGoal(): boolean {
@@ -86,61 +86,82 @@ export default class Board {
         return true
     }
 
-    public down() {
-        let y0 = this.blank[0]
-        let x0 = this.blank[1]
-        this.tiles[y0][x0] = this.tiles[y0 - 1][x0]
-        this.tiles[y0 - 1][x0] = 0
-        this.blank = [y0 - 1, x0]
-    }
-
-    public up() {
-        let y0 = this.blank[0]
-        let x0 = this.blank[1]
-        this.tiles[y0][x0] = this.tiles[y0 + 1][x0]
-        this.tiles[y0 + 1][x0] = 0
-        this.blank = [y0 + 1, x0]
-    }
-
-    public right() {
-        let y0 = this.blank[0]
-        let x0 = this.blank[1]
-        this.tiles[y0][x0] = this.tiles[y0][x0 - 1]
-        this.tiles[y0][x0 - 1] = 0
-        this.blank = [y0, x0 - 1]
-    }
-
-    public left() {
-        let y0 = this.blank[0]
-        let x0 = this.blank[1]
-        this.tiles[y0][x0] = this.tiles[y0][x0 + 1]
-        this.tiles[y0][x0 + 1] = 0
-        this.blank = [y0, x0 + 1]
-    }
-
     // all neighboring boards
     public get_neighbors(): Array<Board> {
         let neighbors = new Array<Board>()
         if (this.blank[0] > 0) {
-            let board = Board.fromOther(this)
-            board.down()
-            neighbors.push(board)
+            let tiles_copy = Board.deepCopyTiles(this.tiles)
+            Board.swapTiles(tiles_copy, this.blank, [this.blank[0]-1, this.blank[1]])
+            neighbors.push(new Board(this.n, tiles_copy))
         }
         if (this.blank[0] < this.n - 1) {
-            let board = Board.fromOther(this)
-            board.up()
-            neighbors.push(board)
+            let tiles_copy = Board.deepCopyTiles(this.tiles)
+            Board.swapTiles(tiles_copy, this.blank, [this.blank[0]+1, this.blank[1]])
+            neighbors.push(new Board(this.n, tiles_copy))
         }
         if (this.blank[1] > 0) {
-            let board = Board.fromOther(this)
-            board.right()
-            neighbors.push(board)
+            let tiles_copy = Board.deepCopyTiles(this.tiles)
+            Board.swapTiles(tiles_copy, this.blank, [this.blank[0], this.blank[1]-1])
+            neighbors.push(new Board(this.n, tiles_copy))
         }
         if (this.blank[1] < this.n - 1) {
-            let board = Board.fromOther(this)
-            board.left()
-            neighbors.push(board)
+            let tiles_copy = Board.deepCopyTiles(this.tiles)
+            Board.swapTiles(tiles_copy, this.blank, [this.blank[0], this.blank[1]+1])
+            neighbors.push(new Board(this.n, tiles_copy)) 
         }
         return neighbors
+    }
+
+    static swapTiles (tiles: number[][], tile1: number[], tile2: number[]){
+        let tmp : number = tiles[tile1[0]][tile1[1]]
+        tiles[tile1[0]][tile1[1]] = tiles[tile2[0]][tile2[1]]
+        tiles[tile2[0]][tile2[1]] = tmp
+    }
+
+    static deepCopyTiles (tiles: number[][]) :  number[][] {
+        let n = tiles.length
+        let new_tiles = new Array<Array<number>>()
+        for (let i: number = 0; i < n; i++) {
+            new_tiles[i] = []
+            for (let j: number = 0; j < n; j++) {
+                new_tiles[i][j] = tiles[i][j] 
+            }
+        }
+        return new_tiles
+    }
+
+    private count_invertions(tiles : Array<number>):number{
+        var inversions:number = 0;
+
+        for(var i:number=0;i<tiles.length;i++){
+            for(var j:number=i+1;j<tiles.length;j++){
+                if(tiles[j]>tiles[i]){
+                    inversions++;
+                }
+            }
+        }
+        return inversions
+    }
+
+    // is the initial board solvable? (see below)
+    static isSolvable(board: Board):boolean{
+        let num_inversions : number = board.count_invertions(([] as number[]).concat(...board.tiles))
+        if(board.n % 2 === 0){
+            // dimension is even
+            if(board.blank[0] % 2 === 0){
+                // the blank is on an even row counting from the bottom
+                // (or even row counting from the top starting from 0)
+                // -> invertions must be odd
+                return num_inversions % 2 === 1
+            }else{
+                // the blank is on an even row counting from the bottom
+                // (or even row counting from the top starting from 0)
+                // -> invertions must be even
+                return num_inversions % 2 === 0
+            }
+        }else{
+            // dimension is odd -> inversions must be even 
+            return num_inversions % 2 === 0
+        }
     }
 };
