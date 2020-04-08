@@ -1,7 +1,6 @@
 import React from 'react';
-import logo from './logo.svg';
 import './App.css';
-import {Game, Board} from './tictac';
+import {Game} from './tictac';
 
 function App() {
   return (

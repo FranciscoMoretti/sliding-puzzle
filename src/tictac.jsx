@@ -1,4 +1,5 @@
 import React from 'react';
+import Board from './board'
 
 function Square(props) {
   return (
@@ -8,7 +9,7 @@ function Square(props) {
   );
 }
 
-export class Board extends React.Component {
+export class BoardView extends React.Component {
   renderSquare(i) {
     return (
       <Square
@@ -50,7 +51,7 @@ export class Game extends React.Component {
           squares: Array(9).fill(null)
         }
       ],
-      stepNumber: 0,
+      solutionStepNumber: 0,
       currentTile: 1,
     };
   }
@@ -59,35 +60,43 @@ export class Game extends React.Component {
     if(this.state.currentTile > 8){
       return
     }
-    const history = this.state.history.slice(0, this.state.stepNumber + 1);
-    const current = history[history.length - 1];
-    const squares = current.squares.slice();
-    if (calculateWinner(squares) || squares[i]) {
-      return;
-    }
+    // const history = this.state.history.slice(0, this.state.solutionStepNumber + 1);
+    // const current = history[history.length - 1];
+    // const squares = current.squares.slice();
+    // if (calculateWinner(squares) || squares[i]) {
+    //   return;
+    // }
+    // squares[i] = this.state.currentTile;
+
+    const initial = this.state.history[0];
+    const squares = initial.squares.slice();
     squares[i] = this.state.currentTile;
+    if(this.state.currentTile === 8){
+      squares[squares.indexOf(null)] = 0;
+    }
     this.setState({
-      history: history.concat([
-        {
+      history: //history.concat([
+        [{
           squares: squares
-        }
-      ]),
-      stepNumber: history.length,
+        }],
+//      ]),
+      // solutionStepNumber: history.length,
       currentTile: this.state.currentTile + 1 
     });
   }
 
   jumpTo(step) {
     this.setState({
-      stepNumber: step,
-      xIsNext: (step % 2) === 0
+      solutionStepNumber: step,
+      // SET THE RIGHT BOARD
+      // xIsNext: (step % 2) === 0
     });
   }
 
   render() {
     const history = this.state.history;
-    const current = history[this.state.stepNumber];
-    const winner = calculateWinner(current.squares);
+    const current = history[this.state.solutionStepNumber];
+    // const winner = calculateWinner(current.squares);
 
     const moves = history.map((step, move) => {
       const desc = move ?
@@ -101,8 +110,8 @@ export class Game extends React.Component {
     });
 
     let status;
-    if (winner) {
-      status = "Winner: " + winner;
+    if (false) { // place here the solved status!
+      status = "Winner: " // + winner;
     } else {
       status = "Next tile: " + this.state.currentTile;
     }
@@ -110,7 +119,7 @@ export class Game extends React.Component {
     return (
       <div className="game">
         <div className="game-board">
-          <Board
+          <BoardView
             squares={current.squares}
             onClick={i => this.handleClick(i)}
           />
@@ -122,28 +131,4 @@ export class Game extends React.Component {
       </div>
     );
   }
-}
-
-// ========================================
-
-// ReactDOM.render(<Game />, document.getElementById("root"));
-
-function calculateWinner(squares) {
-  const lines = [
-    [0, 1, 2],
-    [3, 4, 5],
-    [6, 7, 8],
-    [0, 3, 6],
-    [1, 4, 7],
-    [2, 5, 8],
-    [0, 4, 8],
-    [2, 4, 6]
-  ];
-  for (let i = 0; i < lines.length; i++) {
-    const [a, b, c] = lines[i];
-    if (squares[a] && squares[a] === squares[b] && squares[a] === squares[c]) {
-      return squares[a];
-    }
-  }
-  return null;
 }
