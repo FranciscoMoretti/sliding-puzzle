@@ -58,7 +58,7 @@ export class Game extends React.Component {
   }
 
   handleClick(i) {
-    if(this.state.currentTile > 8){
+    if(this.state.currentTile > 8 || this.state.history[0].squares[i] !== null){
       return
     }
     const history = this.state.history.slice(0);
