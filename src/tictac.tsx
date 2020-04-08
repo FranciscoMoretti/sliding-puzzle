@@ -1,55 +1,75 @@
-import React from 'react';
+import React, { FunctionComponent } from 'react';
 import Board from './board'
 import Solver from "./solver"
 
-function Square(props) {
+type SquareProps = {
+  onClick: (() => void),
+  value: number
+}
+
+export const Square : React.FC<SquareProps> = ({onClick, value}) => {
   return (
-    <button className="square" onClick={props.onClick}>
-      {props.value}
+    <button className="square" onClick={onClick}>
+      {value}
     </button>
   );
 }
 
-export class BoardView extends React.Component {
-  renderSquare(i) {
+type GridViewProps = {
+  onClick: ((i:number) => void),
+  grid: Array<number>
+}
+
+export const GridView : React.FC<GridViewProps> = ({onClick, grid}) => {
+  function renderSquare(i:number) {
     return (
       <Square
-        value={this.props.squares[i]}
-        onClick={() => this.props.onClick(i)}
+        value={grid[i]}
+        onClick={() => onClick(i)}
       />
     );
   }
 
-  render() {
-    return (
-      <div>
-        <div className="board-row">
-          {this.renderSquare(0)}
-          {this.renderSquare(1)}
-          {this.renderSquare(2)}
-        </div>
-        <div className="board-row">
-          {this.renderSquare(3)}
-          {this.renderSquare(4)}
-          {this.renderSquare(5)}
-        </div>
-        <div className="board-row">
-          {this.renderSquare(6)}
-          {this.renderSquare(7)}
-          {this.renderSquare(8)}
-        </div>
+  return (
+    <div>
+      <div className="board-row">
+        {renderSquare(0)}
+        {renderSquare(1)}
+        {renderSquare(2)}
       </div>
-    );
-  }
+      <div className="board-row">
+        {renderSquare(3)}
+        {renderSquare(4)}
+        {renderSquare(5)}
+      </div>
+      <div className="board-row">
+        {renderSquare(6)}
+        {renderSquare(7)}
+        {renderSquare(8)}
+      </div>
+    </div>
+  );
 }
 
-export class Game extends React.Component {
-  constructor(props) {
+interface IProps {
+}
+
+interface HistoryPointType{
+  squares: Array<number>
+}
+
+interface IState {
+  history: Array<HistoryPointType>,
+  solutionStepNumber: number,
+  currentTile: number,}
+
+export class Game extends React.Component<IProps,IState> {
+  constructor(props: any) {
     super(props);
     this.state = {
       history: [
         {
-          squares: Array(9).fill(null)
+          squares: Array(9).fill(-1)
         }
       ],
       solutionStepNumber: 0,
@@ -57,8 +77,8 @@ export class Game extends React.Component {
     };
   }
 
-  handleClick(i) {
-    if(this.state.currentTile > 8 || this.state.history[0].squares[i] !== null){
+  handleClick(i: number) {
+    if(this.state.currentTile > 8 || this.state.history[0].squares[i] !== -1){
       return
     }
     const history = this.state.history.slice(0);
@@ -66,7 +86,7 @@ export class Game extends React.Component {
     const squares = initial.squares.slice();
     squares[i] = this.state.currentTile;
     if(this.state.currentTile === 8){
-      squares[squares.indexOf(null)] = 0;
+      squares[squares.indexOf(-1)] = 0;
       history[0].squares = squares
       let board = new Board(3,
         [squares.slice(0,3), squares.slice(3,6), squares.slice(6,9)])
@@ -94,7 +114,7 @@ export class Game extends React.Component {
     });
   }
 
-  jumpTo(step) {
+  jumpTo(step: number) {
     this.setState({
       solutionStepNumber: step,
     });
@@ -126,8 +146,8 @@ export class Game extends React.Component {
     return (
       <div className="game">
         <div className="game-board">
-          <BoardView
-            squares={current.squares}
+          <GridView
+            grid={current.squares}
             onClick={i => this.handleClick(i)}
           />
         </div>
