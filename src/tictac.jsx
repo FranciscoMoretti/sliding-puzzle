@@ -1,5 +1,6 @@
 import React from 'react';
 import Board from './board'
+import Solver from "./solver"
 
 function Square(props) {
   return (
@@ -60,27 +61,35 @@ export class Game extends React.Component {
     if(this.state.currentTile > 8){
       return
     }
-    // const history = this.state.history.slice(0, this.state.solutionStepNumber + 1);
-    // const current = history[history.length - 1];
-    // const squares = current.squares.slice();
-    // if (calculateWinner(squares) || squares[i]) {
-    //   return;
-    // }
-    // squares[i] = this.state.currentTile;
-
+    const history = this.state.history.slice(0);
     const initial = this.state.history[0];
     const squares = initial.squares.slice();
     squares[i] = this.state.currentTile;
     if(this.state.currentTile === 8){
       squares[squares.indexOf(null)] = 0;
+      history[0].squares = squares
+      let board = new Board(3,
+        [squares.slice(0,3), squares.slice(3,6), squares.slice(6,9)])
+      if(Board.isSolvable(board)){
+        let solver = new Solver(board)
+        console.log("moves number:" + solver.moves())
+        let solutionSteps = solver.solution()
+        for (let i= 0; i< solutionSteps.length; i++){
+          history.push(
+            {
+              squares: [...solutionSteps[i].tiles[0], 
+                ...solutionSteps[i].tiles[1],
+                ...solutionSteps[i].tiles[2]]
+            },
+          )
+        }
+      }
+    }else{
+      history[0].squares = squares
     }
     this.setState({
-      history: //history.concat([
-        [{
-          squares: squares
-        }],
-//      ]),
-      // solutionStepNumber: history.length,
+      history: history,
+      solutionStepNumber: history.length -1,
       currentTile: this.state.currentTile + 1 
     });
   }
@@ -88,8 +97,6 @@ export class Game extends React.Component {
   jumpTo(step) {
     this.setState({
       solutionStepNumber: step,
-      // SET THE RIGHT BOARD
-      // xIsNext: (step % 2) === 0
     });
   }
 
@@ -101,7 +108,7 @@ export class Game extends React.Component {
     const moves = history.map((step, move) => {
       const desc = move ?
         'Go to move #' + move :
-        'Go to game start';
+        'Go to initial board';
       return (
         <li key={move}>
           <button onClick={() => this.jumpTo(move)}>{desc}</button>
@@ -110,8 +117,8 @@ export class Game extends React.Component {
     });
 
     let status;
-    if (false) { // place here the solved status!
-      status = "Winner: " // + winner;
+    if (this.state.currentTile > 8) {
+      status = "Move: "+ this.state.solutionStepNumber;
     } else {
       status = "Next tile: " + this.state.currentTile;
     }
