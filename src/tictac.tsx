@@ -1,4 +1,4 @@
-import React, { FunctionComponent } from 'react';
+import React from 'react';
 import Board from './board'
 import Solver from "./solver"
 
@@ -123,9 +123,8 @@ export class Game extends React.Component<IProps,IState> {
   render() {
     const history = this.state.history;
     const current = history[this.state.solutionStepNumber];
-    // const winner = calculateWinner(current.squares);
 
-    const moves = history.map((step, move) => {
+    const moves = history.map((_, move: number)=> {
       const desc = move ?
         'Go to move #' + move :
         'Go to initial board';

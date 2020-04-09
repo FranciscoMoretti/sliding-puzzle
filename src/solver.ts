@@ -49,7 +49,7 @@ export default class Solver {
 
     private a_star(initial:Board): Array<Board> {
         let frontier_pq = new Collections.PriorityQueue<SearchNode>(compareFunction)
-        frontier_pq.enqueue(new SearchNode(this.board, 0))
+        frontier_pq.enqueue(new SearchNode(initial, 0))
         
         while(!frontier_pq.isEmpty()){
             let current : SearchNode = frontier_pq.dequeue()!
