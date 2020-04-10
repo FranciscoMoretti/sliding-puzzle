@@ -97,9 +97,7 @@ export class Game extends React.Component<IProps,IState> {
         for (let i= 0; i< solutionSteps.length; i++){
           history.push(
             {
-              squares: [...solutionSteps[i].tiles[0], 
-                ...solutionSteps[i].tiles[1],
-                ...solutionSteps[i].tiles[2]]
+              squares: solutionSteps[i].tiles.flat()
             },
           )
         }
