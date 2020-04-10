@@ -1,6 +1,6 @@
 import React from 'react';
 import './App.css';
-import {Game} from './tictac';
+import {Game} from './puzzle';
 
 function App() {
   return (
