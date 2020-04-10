@@ -3,6 +3,7 @@ import Board from './board'
 import Solver from "./solver"
 import Typography from '@material-ui/core/Typography';
 import Slider from '@material-ui/core/Slider';
+import update from "immutability-helper"
 
 type SquareProps = {
   onClick: (() => void),
@@ -18,16 +19,16 @@ export const Square : React.FC<SquareProps> = ({onClick, value}) => {
 }
 
 type GridViewProps = {
-  onClick: ((i:number) => void),
-  grid: Array<number>
+  onClick: ((row:number, column:number) => void),
+  grid: Array<Array<number>>
 }
 
 export const GridView : React.FC<GridViewProps> = ({onClick, grid}) => {
-  function renderSquare(i:number) {
+  function renderSquare(row:number, column:number) {
     return (
-      <Square
-        value={grid[i]}
-        onClick={() => onClick(i)}
+      <Square 
+        value={grid[row][column]}
+        onClick={() => {onClick(row, column)}}
       />
     );
   }
@@ -35,19 +36,19 @@ export const GridView : React.FC<GridViewProps> = ({onClick, grid}) => {
   return (
     <div>
       <div className="board-row">
-        {renderSquare(0)}
-        {renderSquare(1)}
-        {renderSquare(2)}
+        {renderSquare(0,0)}
+        {renderSquare(0,1)}
+        {renderSquare(0,2)}
       </div>
       <div className="board-row">
-        {renderSquare(3)}
-        {renderSquare(4)}
-        {renderSquare(5)}
+        {renderSquare(1,0)}
+        {renderSquare(1,1)}
+        {renderSquare(1,2)}
       </div>
       <div className="board-row">
-        {renderSquare(6)}
-        {renderSquare(7)}
-        {renderSquare(8)}
+        {renderSquare(2,0)}
+        {renderSquare(2,1)}
+        {renderSquare(2,2)}
       </div>
     </div>
   );
@@ -57,7 +58,7 @@ interface IProps {
 }
 
 interface HistoryPointType{
-  squares: Array<number>
+  squares: Array<Array<number>>
 }
 
 interface IState {
@@ -71,7 +72,7 @@ export class Game extends React.Component<IProps,IState> {
     this.state = {
       history: [
         {
-          squares: Array(9).fill(-1)
+          squares:Array<Array<number>>(3).fill([]).map(() => new Array<number>(3).fill(-1))
         }
       ],
       solutionStepNumber: 0,
@@ -79,37 +80,43 @@ export class Game extends React.Component<IProps,IState> {
     };
   }
 
-  handleClick(i: number) {
-    if(this.state.currentTile > 8 || this.state.history[0].squares[i] !== -1){
+  handleClick(row: number, column: number) {
+    if(this.state.currentTile > 8 || this.state.history[0].squares[row][column] !== -1){
       return
     }
-    const history = this.state.history.slice(0);
-    const initial = this.state.history[0];
-    const squares = initial.squares.slice();
-    squares[i] = this.state.currentTile;
+    let initial_squares : Array<Array<number>> = update(this.state.history[0].squares, {
+      [row]: {
+        [column]: {$set: this.state.currentTile}
+      }
+    })
+
     if(this.state.currentTile === 8){
-      squares[squares.indexOf(-1)] = 0;
-      history[0].squares = squares
-      let board = new Board(3,
-        [squares.slice(0,3), squares.slice(3,6), squares.slice(6,9)])
+      // find the last tile and set it to 0 (blank)
+      for (let rowArr of initial_squares) {
+        let ind = rowArr.indexOf(-1)
+        if (ind !== -1){
+          rowArr[ind] = 0
+          break
+        }
+      }
+      let board = new Board(3, initial_squares)
       if(Board.isSolvable(board)){
         let solver = new Solver(board)
         console.log("moves number:" + solver.moves())
         let solutionSteps = solver.solution()
-        for (let i= 0; i< solutionSteps.length; i++){
-          history.push(
-            {
-              squares: solutionSteps[i].tiles.flat()
-            },
-          )
-        }
+        this.setState({
+          history: [{squares:initial_squares }, ...solutionSteps.map((step) =>{ return {squares: step.tiles}})],
+        })
+      }else{
+        console.log("Unsolvable board")
       }
     }else{
-      history[0].squares = squares
+      this.setState({
+        history : [{squares:initial_squares}]
+      })
     }
     this.setState({
-      history: history,
-      solutionStepNumber: history.length -1,
+      solutionStepNumber:  this.state.history.length -1,
       currentTile: this.state.currentTile + 1 
     });
   }
@@ -145,7 +152,7 @@ export class Game extends React.Component<IProps,IState> {
         <div className="game-board">
           <GridView
             grid={history[this.state.solutionStepNumber].squares}
-            onClick={i => this.handleClick(i)}
+            onClick={(row, col) => this.handleClick(row, col)}
           />
         </div>
         <div className="game-info">
