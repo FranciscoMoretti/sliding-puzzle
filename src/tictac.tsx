@@ -1,6 +1,8 @@
 import React from 'react';
 import Board from './board'
 import Solver from "./solver"
+import Typography from '@material-ui/core/Typography';
+import Slider from '@material-ui/core/Slider';
 
 type SquareProps = {
   onClick: (() => void),
@@ -120,18 +122,6 @@ export class Game extends React.Component<IProps,IState> {
 
   render() {
     const history = this.state.history;
-    const current = history[this.state.solutionStepNumber];
-
-    const moves = history.map((_, move: number)=> {
-      const desc = move ?
-        'Go to move #' + move :
-        'Go to initial board';
-      return (
-        <li key={move}>
-          <button onClick={() => this.jumpTo(move)}>{desc}</button>
-        </li>
-      );
-    });
 
     let status;
     if (this.state.currentTile > 8) {
@@ -140,18 +130,41 @@ export class Game extends React.Component<IProps,IState> {
       status = "Next tile: " + this.state.currentTile;
     }
 
+    const marks = this.state.currentTile > 8 ? [
+      {
+        value: 0,
+        label: 'Start',
+      },
+      {
+        value: history.length-1,
+        label: 'end',
+      },] : [];
+
     return (
       <div className="game">
         <div className="game-board">
           <GridView
-            grid={current.squares}
+            grid={history[this.state.solutionStepNumber].squares}
             onClick={i => this.handleClick(i)}
           />
         </div>
         <div className="game-info">
           <div>{status}</div>
-          <ol>{moves}</ol>
         </div>
+        <Typography id="discrete-slider" gutterBottom>
+        Step
+        </Typography>
+        <Slider
+          defaultValue={0}
+          aria-labelledby="discrete-slider"
+          valueLabelDisplay="auto"
+          step={1}
+          marks={marks}
+          onChangeCommitted={(_, value:number | number[]) => {this.jumpTo(value as number)}}
+          min={0}
+          max={history.length-1}
+          disabled={this.state.currentTile < 9}
+        />
       </div>
     );
   }
